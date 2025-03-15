@@ -41,7 +41,11 @@ bool is_adjacent(const string& word1, const string& word2)
 vector<string> generate_word_ladder(const string&  begin_word, const string& end_word, const set<string>& word_list)
 {
     if (begin_word == end_word)
-    {error(begin_word, end_word, "Start and end words are SAME");
+    {error(begin_word, end_word, "Start and end words are SAME!");
+    return {};}
+
+    if (begin_word.length() != end_word.length())
+    {error(begin_word, end_word, "Start and end words must be same length!");
     return {};}
 
     queue<vector<string>> ladder_q;
@@ -85,8 +89,11 @@ void load_words(set<string>& word_list, const string& file_name)
 
 void print_word_ladder(const vector<string>& ladder)
 {
-    for (const string& word : ladder){cout << word << " ";}
-    cout << endl;
+    if (ladder.empty()) {cout << "No word ladder found! \n";}
+    else{cout << "Word ladder found: ";
+        for (const string& word : ladder){cout << word << " ";}
+        cout << "\n";
+    }
 }
 
 void verify_word_ladder()
