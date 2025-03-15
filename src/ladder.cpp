@@ -48,6 +48,10 @@ vector<string> generate_word_ladder(const string&  begin_word, const string& end
     {error(begin_word, end_word, "Start and end words must be same length!");
     return {};}
 
+    if (word_list.find(end_word) == word_list.end())
+    {error(begin_word, end_word, "End word not in file!");
+    return {};} 
+
     queue<vector<string>> ladder_q;
     ladder_q.push({begin_word});
 
@@ -89,7 +93,7 @@ void load_words(set<string>& word_list, const string& file_name)
 
 void print_word_ladder(const vector<string>& ladder)
 {
-    if (ladder.empty()) {cout << "No word ladder found! \n";}
+    if (ladder.empty()) {cout << "No word ladder found.\n";}
     else{cout << "Word ladder found: ";
         for (const string& word : ladder){cout << word << " ";}
         cout << "\n";

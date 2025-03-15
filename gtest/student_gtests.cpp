@@ -53,7 +53,7 @@ TEST(LadderTest, NoLadder)
 TEST(LadderTest, EndWordNotIn)
 {
   set<string> wordlist = loadTestDictionary();
-  vector<string> ladder = generate_word_ladder("cat", "zzz", wordlist);
+  vector<string> ladder = generate_word_ladder("dog", "xyz", wordlist);
   ASSERT_TRUE(ladder.empty());
 }
 
@@ -74,9 +74,9 @@ TEST(DijkstrasTest, Valid)
 
   vector<int> p1 = extract_shortest_path(distances, previous, 1);
   EXPECT_EQ(p1.size(), 3);
-  EXPECT_EQ(p1[1], 0);
-  EXPECT_EQ(p1[2], 3);
-  EXPECT_EQ(p1[3], 1);
+  EXPECT_EQ(p1[0], 0);
+  EXPECT_EQ(p1[1], 3);
+  EXPECT_EQ(p1[2], 1);
 }
 
 TEST(DijkstrasTest, SingleVertex)
