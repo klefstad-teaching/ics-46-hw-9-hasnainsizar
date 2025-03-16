@@ -2,7 +2,7 @@
 #include <queue>
 #include <vector>
 #include <set>
-#include <unordered_set>
+#include <map>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
@@ -11,28 +11,30 @@ using namespace std;
 
 #define my_assert(e) {cout << #e << ((e) ? " passed": " failed") << endl;}
 
-void error(string word1, string word2, string msg)
+bool edit_distance_within(const string& str1, const string& str2, int d)
 {
-    cout << "Error: " << msg << " for words " << word1 << " and " << word2 << endl;
-}
+    int len1 = str1.length();
+    int len2 = str2.length();
+    if (abs(len1 - len2) > d) { return false; }
 
-vector<string> get_adjacent_words(const string& word, const unordered_set<string>& word_set)
-{
-    vector<string> adjacent_words;
-    for (size_t i = 0; i < word.length(); ++i)
+    vector<vector<int>> dp(len1 + 1, vector<int>(len2 + 1, 0));
+
+    for (int i = 0; i <= len1; ++i)
     {
-        string mutated_word = word;
-        for (char c = 'a'; c <= 'z'; ++c)
+        for (int j = 0; j <= len2; ++j)
         {
-            if (c == word[i]) continue; // Skip the original character
-            mutated_word[i] = c;
-            if (word_set.find(mutated_word) != word_set.end())
-            {
-                adjacent_words.push_back(mutated_word);
-            }
+            if (i == 0) { dp[i][j] = j; }
+            else if (j == 0) { dp[i][j] = i; }
+            else if (str1[i - 1] == str2[j - 1]) { dp[i][j] = dp[i - 1][j - 1]; }
+            else dp[i][j] = 1 + min({ dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1] });
         }
     }
-    return adjacent_words;
+    return dp[len1][len2] <= d;
+}
+
+bool is_adjacent(const string& word1, const string& word2)
+{
+    return edit_distance_within(word1, word2, 1);
 }
 
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list)
@@ -49,13 +51,10 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         return {};
     }
 
-    // Convert word_list to unordered_set for O(1) lookups
-    unordered_set<string> word_set(word_list.begin(), word_list.end());
-
     queue<vector<string>> ladder_q;
     ladder_q.push({ begin_word });
 
-    unordered_set<string> visited;
+    set<string> visited;
     visited.insert(begin_word);
 
     while (!ladder_q.empty())
@@ -64,23 +63,23 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         ladder_q.pop();
         string last_word = ladder.back();
 
-        // Get adjacent words by mutating the last word
-        vector<string> adjacent_words = get_adjacent_words(last_word, word_set);
-
-        for (const string& word : adjacent_words)
+        for (const string& word : word_list)
         {
-            if (word == end_word)
+            if (is_adjacent(last_word, word))
             {
-                ladder.push_back(word);
-                return ladder;
-            }
+                if (word == end_word)
+                {
+                    ladder.push_back(word);
+                    return ladder;
+                }
 
-            if (visited.find(word) == visited.end())
-            {
-                visited.insert(word);
-                vector<string> new_ladder = ladder;
-                new_ladder.push_back(word);
-                ladder_q.push(new_ladder);
+                if (visited.find(word) == visited.end())
+                {
+                    visited.insert(word);
+                    vector<string> new_ladder = ladder;
+                    new_ladder.push_back(word);
+                    ladder_q.push(new_ladder);
+                }
             }
         }
     }
@@ -128,4 +127,9 @@ void verify_word_ladder()
     my_assert(generate_word_ladder("work", "play", word_list).size() == 6);
     my_assert(generate_word_ladder("sleep", "awake", word_list).size() == 8);
     my_assert(generate_word_ladder("car", "cheat", word_list).empty()); // No ladder exists
+}
+
+void error(string word1, string word2, string msg)
+{
+    cout << "Error: " << msg << " for words " << word1 << " and " << word2 << endl;
 }
