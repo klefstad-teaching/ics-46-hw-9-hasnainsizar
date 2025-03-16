@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <iostream>
 #include <fstream>
+#include <unordered_set>
 
 using namespace std;
 
@@ -42,19 +43,18 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     if (begin_word == end_word)
     {
         error(begin_word, end_word, "Start and end words are SAME!");
-        return {};
+        return { begin_word };
     }
-
     if (word_list.find(end_word) == word_list.end())
     {
         error(begin_word, end_word, "End word not in file!");
         return {};
     }
-
+    unordered_set<string> word_set(word_list.begin(), word_list.end());
     queue<vector<string>> ladder_q;
     ladder_q.push({ begin_word });
 
-    set<string> visited;
+    unordered_set<string> visited;
     visited.insert(begin_word);
 
     while (!ladder_q.empty())
@@ -63,22 +63,29 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         ladder_q.pop();
         string last_word = ladder.back();
 
-        for (const string& word : word_list)
+        for (size_t i = 0; i < last_word.length(); ++i)
         {
-            if (is_adjacent(last_word, word))
+            string mutated_word = last_word;
+            for (char c = 'a'; c <= 'z'; ++c)
             {
-                if (word == end_word)
-                {
-                    ladder.push_back(word);
-                    return ladder;
-                }
+                if (c == last_word[i]) continue; 
+                mutated_word[i] = c;
 
-                if (visited.find(word) == visited.end())
+                if (word_set.find(mutated_word) != word_set.end())
                 {
-                    visited.insert(word);
-                    vector<string> new_ladder = ladder;
-                    new_ladder.push_back(word);
-                    ladder_q.push(new_ladder);
+                    if (mutated_word == end_word)
+                    {
+                        ladder.push_back(mutated_word);
+                        return ladder;
+                    }
+
+                    if (visited.find(mutated_word) == visited.end())
+                    {
+                        visited.insert(mutated_word);
+                        vector<string> new_ladder = ladder;
+                        new_ladder.push_back(mutated_word);
+                        ladder_q.push(new_ladder);
+                    }
                 }
             }
         }
