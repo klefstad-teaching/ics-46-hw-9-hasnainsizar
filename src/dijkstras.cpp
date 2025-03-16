@@ -9,36 +9,41 @@ using namespace std;
 vector<int> dijkstra_shortest_path(const Graph& G, int source, vector<int>& previous)
 {
     int n = G.numVertices;
-    vector<int> distances(n, INF);
+    vector<int> distances(n, INF); 
     vector<bool> visited(n, false);
 
-    auto cmp = [](const pair<int, int>& a, const pair<int, int>& b){return a.second > b.second;};
+    previous.assign(n, -1);
+
+    auto cmp = [](const pair<int, int>& a, const pair<int, int>& b) { return a.second > b.second; };
     priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(cmp)> pq(cmp);
 
     distances[source] = 0;
-    pq.push({source, 0});
+    pq.push({source, 0}); 
 
-    while (!pq.empty()){
+    while (!pq.empty()) {
         int u = pq.top().first;
         pq.pop();
 
         if (visited[u]) continue;
         visited[u] = true;
 
-        for (const Edge& edge : G[u]){
+        for (const Edge& edge : G[u]) {
             int v = edge.dst;
             int weight = edge.weight;
 
-            if (!visited[v] && distances[u] + weight < distances[v]){
+            if (!visited[v] && distances[u] + weight < distances[v]) {
                 distances[v] = distances[u] + weight;
-                previous[v] = u;
-                pq.push({v,distances[v]});
+                previous[v] = u;                      
+                pq.push({v, distances[v]});           
             }
         }
     }
     cout << "Prev Array: ";
-    for (int i = 0; i < n; ++i){cout << previous[i] << " ";}
+    for (int i = 0; i < n; ++i) {
+        cout << previous[i] << " ";
+    }
     cout << endl;
+
     return distances;
 }
 

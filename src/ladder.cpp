@@ -4,7 +4,6 @@
 #include <set>
 #include <algorithm>
 #include <iostream>
-#include <unordered_set>
 
 using namespace std;
 
@@ -56,48 +55,29 @@ vector<string> generate_word_ladder(const string&  begin_word, const string& end
         error(begin_word, end_word, "End word not in file!");
         return {};} 
 
-    unordered_set<string> dict(word_list.begin(), word_list.end());
     queue<vector<string>> ladder_q;
     ladder_q.push({begin_word});
-    dict.erase(begin_word);
+
+    set<string> visited;
+    visited.insert(begin_word);
 
     while (!ladder_q.empty())
     {
-        int level_size = ladder_q.size();
-        unordered_set<string> wordsUsedThisLevel;
-        
-        for (int i = 0; i < level_size; i++)
+        vector<string> ladder = ladder_q.front();
+        ladder_q.pop();
+        string last_word = ladder.back();
+        // cout << "Exploring ladder: ";
+        for (const string& word : word_list)
         {
-            vector<string> ladder = ladder_q.front();
-            ladder_q.pop();
-            string last_word = ladder.back();
-            
-            for (int pos = 0; pos < last_word.size(); pos++)
-            {
-                string new_word = last_word;
-                for (char c = 'a'; c <= 'z'; c++)
-                {
-                    if (new_word[pos] == c)
-                        continue;
-                    new_word[pos] = c;
-                    
-                    if (dict.find(new_word) != dict.end())
-                    {
-                        vector<string> new_ladder = ladder;
-                        new_ladder.push_back(new_word);
-                        if (new_word == end_word)
-                        {
-                            return new_ladder;
-                        }
-                        ladder_q.push(new_ladder);
-                        wordsUsedThisLevel.insert(new_word);
-                    }
+            if (is_adjacent(last_word, word)){
+                if (visited.find(word) == visited.end()){
+                    visited.insert(word);
+                    vector<string> new_ladder = ladder;
+                    new_ladder.push_back(word);
+                    if (word==end_word){return new_ladder;}
+                    ladder_q.push(new_ladder);
                 }
             }
-        }
-        for (const auto& word : wordsUsedThisLevel)
-        {
-            dict.erase(word);
         }
     }
     error(begin_word, end_word, "No ladder found!");
