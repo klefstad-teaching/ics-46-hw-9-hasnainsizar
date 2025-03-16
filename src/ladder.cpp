@@ -1,12 +1,11 @@
 #include "ladder.h"
+#include <unordered_set>
 #include <queue>
 #include <vector>
 #include <set>
-#include <map>
 #include <algorithm>
 #include <iostream>
 #include <fstream>
-#include <unordered_set>
 
 using namespace std;
 
@@ -43,14 +42,17 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     if (begin_word == end_word)
     {
         error(begin_word, end_word, "Start and end words are SAME!");
-        return { begin_word };
+        return {};
     }
+
     if (word_list.find(end_word) == word_list.end())
     {
         error(begin_word, end_word, "End word not in file!");
         return {};
     }
+
     unordered_set<string> word_set(word_list.begin(), word_list.end());
+
     queue<vector<string>> ladder_q;
     ladder_q.push({ begin_word });
 
@@ -63,6 +65,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
         ladder_q.pop();
         string last_word = ladder.back();
 
+        vector<string> adjacent_words;
         for (size_t i = 0; i < last_word.length(); ++i)
         {
             string mutated_word = last_word;
@@ -73,24 +76,30 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 
                 if (word_set.find(mutated_word) != word_set.end())
                 {
-                    if (mutated_word == end_word)
-                    {
-                        ladder.push_back(mutated_word);
-                        return ladder;
-                    }
-
-                    if (visited.find(mutated_word) == visited.end())
-                    {
-                        visited.insert(mutated_word);
-                        vector<string> new_ladder = ladder;
-                        new_ladder.push_back(mutated_word);
-                        ladder_q.push(new_ladder);
-                    }
+                    adjacent_words.push_back(mutated_word);
                 }
             }
         }
-    }
 
+        sort(adjacent_words.begin(), adjacent_words.end());
+
+        for (const string& word : adjacent_words)
+        {
+            if (word == end_word)
+            {
+                ladder.push_back(word);
+                return ladder;
+            }
+
+            if (visited.find(word) == visited.end())
+            {
+                visited.insert(word);
+                vector<string> new_ladder = ladder;
+                new_ladder.push_back(word);
+                ladder_q.push(new_ladder);
+            }
+        }
+    }
     error(begin_word, end_word, "No ladder found!");
     return {};
 }
@@ -128,6 +137,7 @@ void verify_word_ladder()
     set<string> word_list;
     load_words(word_list, "src/words.txt");
 
+    my_assert(generate_word_ladder("cat", "cat", word_list).empty()); // Same word
     my_assert(generate_word_ladder("cat", "dog", word_list).size() == 4);
     my_assert(generate_word_ladder("marty", "curls", word_list).size() == 6);
     my_assert(generate_word_ladder("code", "data", word_list).size() == 6);
